@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 
-GdkPixbuf *create_icon(const gchar *filename)
+void create_icon(const gchar *filename, GtkWidget *window)
 {
 	GdkPixbuf *icon;
 	GError *error = NULL;
@@ -12,28 +13,22 @@ GdkPixbuf *create_icon(const gchar *filename)
 		fprintf(stderr, "%s\n", error->message);
 		g_error_free(error);
 	}
-
-	return icon;
+	else {
+		gtk_window_set_icon(GTK_WINDOW(window), icon);
+		g_object_unref(icon);
+	}
 }
 
 GtkWidget *create_window()
 {
-	GtkWidget *window;
+	GtkWidget *window = NULL;
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(window), "Hackers Eye");
-	gtk_window_set_default_size(GTK_WINDOW(window), 320, 380);
+	gtk_window_set_default_size(GTK_WINDOW(window), 720, 480);
 	gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 
-	return window;
-}
-
-void set_destroy_signal(GtkWidget *window)
-{
 	g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
-}
 
-void free_icon_object(GdkPixbuf *icon)
-{
-	g_object_unref(icon);
+	return window;
 }
