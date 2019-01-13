@@ -4,7 +4,5 @@
 	#include <gtk/gtk.h>
 
 	GtkWidget *create_window();
-	GdkPixbuf *create_icon(const gchar *);
-	void set_destroy_signal(GtkWidget *);
-	void free_icon_object(GdkPixbuf *);
+	void create_icon(const gchar *, GtkWidget *);
 #endif
