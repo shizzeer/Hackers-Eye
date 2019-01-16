@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <string.h>
+#include "file_menu.h"
 
 static void add_separator_to_menu(GtkWidget *menu)
 {
@@ -8,76 +9,6 @@ static void add_separator_to_menu(GtkWidget *menu)
 	separator = gtk_separator_menu_item_new();
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), separator);
 }
-
-static void add_items_to_file_menu(GtkWidget *menu, GtkAccelGroup *accel_group)
-{
-	GtkWidget *file_menu_item = NULL;
-
-	for (int i = 0; i < 7; i++)
-	{
-		switch (i)
-		{
-			case 0:
-			{
-				file_menu_item = gtk_image_menu_item_new_from_stock(GTK_STOCK_NEW, NULL);
-				
-				gtk_widget_add_accelerator(file_menu_item, "activate", accel_group, GDK_n,
-					GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-			}
-			break;
-			case 1:
-			{
-				file_menu_item = gtk_image_menu_item_new_from_stock(GTK_STOCK_OPEN, NULL);
-				
-				gtk_widget_add_accelerator(file_menu_item, "activate", accel_group, GDK_o,
-					GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-			}
-			break;
-			case 2:
-			{ 
-				add_separator_to_menu(menu);
-				file_menu_item = gtk_image_menu_item_new_from_stock(GTK_STOCK_SAVE, NULL);
-				
-				gtk_widget_add_accelerator(file_menu_item, "activate", accel_group, GDK_s,
-					GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-			}
-			break;
-			case 3:
-			{
-				file_menu_item = gtk_image_menu_item_new_from_stock(GTK_STOCK_SAVE_AS, NULL);
-				
-				gtk_widget_add_accelerator(file_menu_item, "activate", accel_group, GDK_s,
-					(GDK_SHIFT_MASK + GDK_CONTROL_MASK), GTK_ACCEL_VISIBLE);
-			}
-			break;
-			case 4: 
-			{
-				add_separator_to_menu(menu);
-				file_menu_item = gtk_menu_item_new_with_label("Export..."); 
-			}
-			break;
-			case 5:
-			{
-				add_separator_to_menu(menu);
-				file_menu_item = gtk_image_menu_item_new_from_stock(GTK_STOCK_CLOSE, NULL);
-				
-				gtk_widget_add_accelerator(file_menu_item, "activate", accel_group, GDK_w,
-					GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-			}
-			break;
-			case 6:
-			{
-				file_menu_item = gtk_image_menu_item_new_from_stock(GTK_STOCK_QUIT, NULL);
-				
-				gtk_widget_add_accelerator(file_menu_item, "activate", accel_group, 
-					GDK_q, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
-			}
-			break;
-		}
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu), file_menu_item);
-	}
-}
-
 static void add_items_to_edit_menu(GtkWidget *menu, GtkAccelGroup *accel_group)
 {
 	GtkWidget *edit_menu_item = NULL;
@@ -266,7 +197,7 @@ static void add_items_to_menu(GtkWidget *menu, GtkAccelGroup *accel_group, int m
 {
 	switch (menu_number)
 	{
-		case 0: add_items_to_file_menu(menu, accel_group); break;
+		// case 0: add_items_to_file_menu(menu, accel_group); break;
 		case 1: add_items_to_edit_menu(menu, accel_group); break;
 		case 2: add_items_to_view_menu(menu); break;
 		case 3: add_items_to_search_menu(menu, accel_group); break;
@@ -286,7 +217,7 @@ GtkAccelGroup* add_accel_function_to_window(GtkWidget *window)
 	return accel_group;
 }
 
-void create_menu(GtkWidget *window)
+void create_menu(GtkWidget *window, GtkWidget *main_vbox)
 {
 	GtkWidget *vbox_menu = NULL, *menu_bar = NULL, *menu = NULL;
 	GtkWidget *m_item = NULL;
@@ -301,15 +232,38 @@ void create_menu(GtkWidget *window)
 
 	for(int i = 0; i < 6; i++)
 	{
-		menu = gtk_menu_new();
+		/*###############################################################################
+		#																				#
+		#																				#
+		#																				#
+		#																				#
+		#	STRUCTS AND HEADERS											
+		#																				#
+		#																				#
+		#																				#
+		#################################################################################*/
 
-		m_item = gtk_menu_item_new_with_label(menu_names[i]);
+		if (i == 0) {
+			struct f_menu file_menu;
+			file_menu.container = gtk_menu_new();
 
-		gtk_menu_item_set_submenu(GTK_MENU_ITEM(m_item), menu);
-		add_items_to_menu(menu, accel_group, i);
-		gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), m_item);
+			m_item = gtk_menu_item_new_with_label(menu_names[i]);
+			gtk_menu_item_set_submenu(GTK_MENU_ITEM(m_item), file_menu.container);
+
+			add_items_to_file_menu(&file_menu, accel_group);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), m_item);
+		}
+		else {
+			menu = gtk_menu_new();
+
+			m_item = gtk_menu_item_new_with_label(menu_names[i]);
+
+			gtk_menu_item_set_submenu(GTK_MENU_ITEM(m_item), menu);
+			add_items_to_menu(menu, accel_group, i);
+			gtk_menu_shell_append(GTK_MENU_SHELL(menu_bar), m_item); 
+		}
 	}
 
 	gtk_box_pack_start(GTK_BOX(vbox_menu), menu_bar, FALSE, FALSE, 0);
-	gtk_container_add(GTK_CONTAINER(window), vbox_menu);
+	gtk_box_pack_start(GTK_BOX(main_vbox), vbox_menu, FALSE, FALSE, 0);
 }
